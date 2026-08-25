@@ -1,0 +1,88 @@
+// SLTC.me — Idea Marketplace data model
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  IDEA_MAKER
+  INVESTOR
+  ADMIN
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  role          Role
+  phone         String?  // contact info — never exposed until a reveal is paid for
+  bio           String?
+  createdAt     DateTime @default(now())
+
+  // Idea maker side
+  ideas         Idea[]           @relation("MakerIdeas")
+
+  // Investor side
+  subscription  Subscription?
+  views         IdeaView[]
+  reveals       Reveal[]         @relation("InvestorReveals")
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  investor             User     @relation(fields: [investorId], references: [id])
+  investorId           String   @unique
+  stripeCustomerId     String
+  stripeSubscriptionId String
+  status               String   // active, past_due, canceled
+  currentPeriodEnd     DateTime
+  createdAt            DateTime @default(now())
+}
+
+model Idea {
+  id          String     @id @default(cuid())
+  title       String
+  summary     String
+  category    String
+  fundingAsk  String?
+  stage       String?    // e.g. concept, prototype, revenue
+  maker       User       @relation("MakerIdeas", fields: [makerId], references: [id])
+  makerId     String
+  createdAt   DateTime   @default(now())
+
+  views       IdeaView[]
+  reveals     Reveal[]
+}
+
+// Anonymized view counter — idea makers see a count only, never who viewed
+model IdeaView {
+  id         String   @id @default(cuid())
+  idea       Idea     @relation(fields: [ideaId], references: [id])
+  ideaId     String
+  investor   User     @relation(fields: [investorId], references: [id])
+  investorId String
+  createdAt  DateTime @default(now())
+
+  @@unique([ideaId, investorId])
+}
+
+// A paid reveal unlocks mutual contact info between the maker and this investor
+model Reveal {
+  id                  String   @id @default(cuid())
+  idea                Idea     @relation(fields: [ideaId], references: [id])
+  ideaId              String
+  investor            User     @relation("InvestorReveals", fields: [investorId], references: [id])
+  investorId          String
+  amountCents         Int      // flat reveal fee charged, in cents
+  stripePaymentIntent String
+  status              String   // pending, paid, refunded
+  createdAt           DateTime @default(now())
+
+  @@unique([ideaId, investorId])
+}
