@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
-export default function SignupPage() { Save
+export default function SignupForm() {
   const params = useSearchParams();
   const router = useRouter();
   const [role, setRole] = useState(params.get('role') === 'INVESTOR' ? 'INVESTOR' : 'IDEA_MAKER');
