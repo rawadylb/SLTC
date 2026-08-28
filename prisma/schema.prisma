@@ -24,6 +24,8 @@ model User {
   role          Role
   phone         String?  // contact info — never exposed until a reveal is paid for
   bio           String?
+  emailVerified DateTime?
+  verificationToken String? @unique
   createdAt     DateTime @default(now())
 
   // Idea maker side
