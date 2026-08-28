@@ -12,6 +12,7 @@ datasource db {
 enum Role {
   IDEA_MAKER
   INVESTOR
+  ASSISTANT
   ADMIN
 }
 
