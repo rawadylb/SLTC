@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
 
 export default function SignupForm() {
   const params = useSearchParams();
@@ -23,25 +22,15 @@ export default function SignupForm() {
       body: JSON.stringify({ ...form, role }),
     });
 
+    setLoading(false);
+
     if (!res.ok) {
       const data = await res.json();
       setError(data.error?.formErrors?.[0] || data.error || 'Something went wrong');
-      setLoading(false);
       return;
     }
 
-    const login = await signIn('credentials', {
-      email: form.email,
-      password: form.password,
-      redirect: false,
-    });
-
-    setLoading(false);
-    if (login?.ok) {
-      router.push(role === 'IDEA_MAKER' ? '/dashboard/maker' : '/dashboard/investor');
-    } else {
-      router.push('/login');
-    }
+    router.push('/verify-email');
   }
 
   return (

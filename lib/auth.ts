@@ -22,6 +22,12 @@ export const authOptions: NextAuthOptions = {
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!valid) return null;
 
+        // Admins/Assistants are created directly by an admin and don't go through
+        // the email-verification signup flow, so they're exempt from this check.
+        if (!user.emailVerified && user.role !== 'ADMIN' && user.role !== 'ASSISTANT') {
+          return null;
+        }
+
         return { id: user.id, name: user.name, email: user.email, role: user.role };
       },
     }),
