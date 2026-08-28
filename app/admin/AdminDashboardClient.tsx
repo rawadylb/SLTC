@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-type User = { id: string; name: string; email: string; role: string; createdAt: string };
+type User = { id: string; name: string; email: string; role: string; createdAt: Date };
 type Idea = {
-  id: string; title: string; category: string; createdAt: string;
+  id: string; title: string; category: string; createdAt: Date;
   maker: { name: string; email: string };
   _count: { views: number; reveals: number };
 };
