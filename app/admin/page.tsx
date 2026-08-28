@@ -6,11 +6,12 @@ import AdminDashboardClient from './AdminDashboardClient';
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'ASSISTANT')) {
+  const role = session?.user.role as string | undefined;
+  if (!session || (role !== 'ADMIN' && role !== 'ASSISTANT')) {
     redirect('/login');
   }
 
-  const isAdmin = session.user.role === 'ADMIN';
+  const isAdmin = role === 'ADMIN';
 
   const [userCount, ideaCount, activeSubs, revealCount, users, ideas] = await Promise.all([
     db.user.count(),
