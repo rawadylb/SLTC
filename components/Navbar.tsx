@@ -24,15 +24,20 @@ export default function Navbar() {
           )}
 
           {session?.user.role === 'IDEA_MAKER' && (
-            <>
-              <Link href="/dashboard/maker" className="text-slate-600 hover:text-slate-900">My ideas</Link>
-              <button onClick={() => signOut()} className="text-slate-600 hover:text-slate-900">Log out</button>
-            </>
+            <Link href="/dashboard/maker" className="text-slate-600 hover:text-slate-900">My ideas</Link>
           )}
 
           {session?.user.role === 'INVESTOR' && (
+            <Link href="/dashboard/investor" className="text-slate-600 hover:text-slate-900">Browse ideas</Link>
+          )}
+
+          {(session?.user.role === 'ADMIN' || session?.user.role === 'ASSISTANT') && (
+            <Link href="/admin" className="text-slate-600 hover:text-slate-900">Admin</Link>
+          )}
+
+          {session && (
             <>
-              <Link href="/dashboard/investor" className="text-slate-600 hover:text-slate-900">Browse ideas</Link>
+              <Link href="/profile" className="text-slate-600 hover:text-slate-900">Profile</Link>
               <button onClick={() => signOut()} className="text-slate-600 hover:text-slate-900">Log out</button>
             </>
           )}

@@ -23,7 +23,7 @@ export default function LoginPage() {
       router.push('/');
       router.refresh();
     } else {
-      setError('Invalid email or password.');
+      setError('Invalid email/password, or you haven\'t confirmed your email yet — check your inbox for the confirmation link.');
     }
   }
 
