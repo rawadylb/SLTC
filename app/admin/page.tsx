@@ -13,11 +13,10 @@ export default async function AdminDashboard() {
 
   const isAdmin = role === 'ADMIN';
 
-  const [userCount, ideaCount, activeSubs, revealCount, users, ideas] = await Promise.all([
+  const [userCount, ideaCount, interestCount, users, ideas, interests] = await Promise.all([
     db.user.count(),
     db.idea.count(),
-    db.subscription.count({ where: { status: 'active' } }),
-    db.reveal.count({ where: { status: 'paid' } }),
+    db.interestSubmission.count(),
     db.user.findMany({
       orderBy: { createdAt: 'desc' },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
@@ -28,7 +27,16 @@ export default async function AdminDashboard() {
       select: {
         id: true, title: true, category: true, createdAt: true,
         maker: { select: { name: true, email: true } },
-        _count: { select: { views: true, reveals: true } },
+        _count: { select: { views: true, interests: true } },
+      },
+      take: 100,
+    }),
+    db.interestSubmission.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true, phone: true, location: true, capital: true, message: true, createdAt: true,
+        idea: { select: { title: true } },
+        investor: { select: { name: true, email: true } },
       },
       take: 100,
     }),
@@ -37,9 +45,10 @@ export default async function AdminDashboard() {
   return (
     <AdminDashboardClient
       isAdmin={isAdmin}
-      stats={{ userCount, ideaCount, activeSubs, revealCount }}
+      stats={{ userCount, ideaCount, interestCount }}
       users={users}
       ideas={ideas}
+      interests={interests}
     />
   );
 }

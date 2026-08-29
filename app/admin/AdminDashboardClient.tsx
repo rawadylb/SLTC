@@ -7,7 +7,12 @@ type User = { id: string; name: string; email: string; role: string; createdAt: 
 type Idea = {
   id: string; title: string; category: string; createdAt: Date;
   maker: { name: string; email: string };
-  _count: { views: number; reveals: number };
+  _count: { views: number; interests: number };
+};
+type Interest = {
+  id: string; phone: string; location: string; capital: string; message: string | null; createdAt: Date;
+  idea: { title: string };
+  investor: { name: string; email: string };
 };
 
 export default function AdminDashboardClient({
@@ -15,14 +20,16 @@ export default function AdminDashboardClient({
   stats,
   users,
   ideas,
+  interests,
 }: {
   isAdmin: boolean;
-  stats: { userCount: number; ideaCount: number; activeSubs: number; revealCount: number };
+  stats: { userCount: number; ideaCount: number; interestCount: number };
   users: User[];
   ideas: Idea[];
+  interests: Interest[];
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<'users' | 'ideas' | 'assistants'>('users');
+  const [tab, setTab] = useState<'users' | 'ideas' | 'interests' | 'assistants'>('interests');
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,20 +66,43 @@ export default function AdminDashboardClient({
     <div className="space-y-8">
       <h1 className="text-2xl font-bold text-ink">Admin Dashboard</h1>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-3 gap-4">
         <StatCard label="Users" value={stats.userCount} />
         <StatCard label="Ideas posted" value={stats.ideaCount} />
-        <StatCard label="Active subscriptions" value={stats.activeSubs} />
-        <StatCard label="Reveals paid" value={stats.revealCount} />
+        <StatCard label="Interest submissions" value={stats.interestCount} />
       </div>
 
       <div className="flex gap-2 border-b border-slate-200">
+        <TabButton active={tab === 'interests'} onClick={() => setTab('interests')}>Investor Interest</TabButton>
         <TabButton active={tab === 'users'} onClick={() => setTab('users')}>Users</TabButton>
         <TabButton active={tab === 'ideas'} onClick={() => setTab('ideas')}>Ideas</TabButton>
         {isAdmin && (
           <TabButton active={tab === 'assistants'} onClick={() => setTab('assistants')}>Manage Assistants</TabButton>
         )}
       </div>
+
+      {tab === 'interests' && (
+        <div className="space-y-4">
+          {interests.length === 0 && <p className="text-slate-500">No interest submissions yet.</p>}
+          {interests.map((i) => (
+            <div key={i.id} className="rounded-lg border border-slate-200 bg-white p-4">
+              <div className="flex items-start justify-between">
+                <h3 className="font-semibold text-ink">{i.idea.title}</h3>
+                <span className="text-xs text-slate-400">{new Date(i.createdAt).toLocaleDateString()}</span>
+              </div>
+              <p className="mt-2 text-sm text-slate-700">
+                <strong>{i.investor.name}</strong> — {i.investor.email}
+              </p>
+              <div className="mt-1 grid grid-cols-2 gap-x-4 text-sm text-slate-600 sm:grid-cols-3">
+                <span>Phone: {i.phone}</span>
+                <span>Location: {i.location}</span>
+                <span>Capital: {i.capital}</span>
+              </div>
+              {i.message && <p className="mt-2 text-sm text-slate-500">"{i.message}"</p>}
+            </div>
+          ))}
+        </div>
+      )}
 
       {tab === 'users' && (
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
@@ -121,7 +151,7 @@ export default function AdminDashboardClient({
                 <th className="px-4 py-2">Category</th>
                 <th className="px-4 py-2">Maker</th>
                 <th className="px-4 py-2">Views</th>
-                <th className="px-4 py-2">Reveals</th>
+                <th className="px-4 py-2">Interests</th>
               </tr>
             </thead>
             <tbody>
@@ -131,7 +161,7 @@ export default function AdminDashboardClient({
                   <td className="px-4 py-2 text-slate-500">{idea.category}</td>
                   <td className="px-4 py-2 text-slate-500">{idea.maker.name}</td>
                   <td className="px-4 py-2">{idea._count.views}</td>
-                  <td className="px-4 py-2">{idea._count.reveals}</td>
+                  <td className="px-4 py-2">{idea._count.interests}</td>
                 </tr>
               ))}
             </tbody>
@@ -143,7 +173,7 @@ export default function AdminDashboardClient({
         <div className="max-w-md rounded-lg border border-slate-200 bg-white p-5">
           <h2 className="font-semibold text-ink">Create an Assistant account</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Assistants can view users and ideas but can't change roles, see Stripe data, or access this creation form.
+            Assistants can view users, ideas, and investor interest, but can't change roles or access this creation form.
           </p>
           <form onSubmit={createAssistant} className="mt-4 space-y-3">
             <input

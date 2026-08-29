@@ -27,3 +27,31 @@ export async function sendVerificationEmail(to: string, token: string) {
     `,
   });
 }
+
+export async function sendInterestNotification(
+  adminEmails: string[],
+  data: { ideaTitle: string; ideaId: string; investorName: string; investorEmail: string; phone: string; location: string; capital: string; message?: string }
+) {
+  if (adminEmails.length === 0) return;
+
+  await resend.emails.send({
+    from: FROM_ADDRESS,
+    to: adminEmails,
+    subject: `New investor interest: ${data.ideaTitle}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto;">
+        <h2>New investor interest</h2>
+        <p><strong>Idea:</strong> ${data.ideaTitle} (ID: ${data.ideaId})</p>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0;" />
+        <p><strong>Investor:</strong> ${data.investorName} (${data.investorEmail})</p>
+        <p><strong>Phone:</strong> ${data.phone}</p>
+        <p><strong>Location:</strong> ${data.location}</p>
+        <p><strong>Approximate capital:</strong> ${data.capital}</p>
+        ${data.message ? `<p><strong>Message:</strong> ${data.message}</p>` : ''}
+        <p style="margin-top:24px;color:#64748b;font-size:13px;">
+          Review this in your admin dashboard and decide whether to connect them with the idea maker.
+        </p>
+      </div>
+    `,
+  });
+}

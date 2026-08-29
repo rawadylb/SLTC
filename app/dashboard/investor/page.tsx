@@ -8,24 +8,21 @@ export default async function InvestorDashboard() {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== 'INVESTOR') redirect('/login');
 
-  const sub = await db.subscription.findUnique({ where: { investorId: session.user.id } });
-  const active = !!sub && sub.status === 'active' && sub.currentPeriodEnd > new Date();
+  const ideas = await db.idea.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      title: true,
+      category: true,
+      createdAt: true,
+      interests: { where: { investorId: session.user.id } },
+    },
+  });
 
-  const ideas = active
-    ? await db.idea.findMany({
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          title: true,
-          summary: true,
-          category: true,
-          fundingAsk: true,
-          stage: true,
-          _count: { select: { views: true } },
-          reveals: { where: { investorId: session.user.id, status: 'paid' } },
-        },
-      })
-    : [];
+  const investor = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { phone: true },
+  });
 
-  return <InvestorDashboardClient active={active} ideas={ideas} />;
+  return <InvestorDashboardClient ideas={ideas} investorPhone={investor?.phone || ''} />;
 }

@@ -28,22 +28,22 @@ export default function Home() {
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           <h3 className="font-semibold text-ink">1. Post or Browse</h3>
           <p className="mt-2 text-sm text-slate-600">
-            Idea makers post ideas for free. Investors subscribe to browse the full feed —
+            Idea makers post ideas for free. Investors browse titles for free too —
             no names or contact details attached to any listing.
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h3 className="font-semibold text-ink">2. Find a fit</h3>
+          <h3 className="font-semibold text-ink">2. Express interest</h3>
           <p className="mt-2 text-sm text-slate-600">
-            Investors can see a summary, category, funding ask, and stage — enough to judge
-            interest without either side being contacted unsolicited.
+            When a title catches an investor's eye, they share their contact info and
+            investment range privately with our team — nothing goes to the idea maker yet.
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h3 className="font-semibold text-ink">3. Reveal & connect</h3>
+          <h3 className="font-semibold text-ink">3. We connect you</h3>
           <p className="mt-2 text-sm text-slate-600">
-            When an investor is genuinely interested, a small reveal fee unlocks mutual
-            contact info for both sides — no unwanted outreach either way.
+            Our team reviews every submission and reaches out to make the introduction —
+            no unwanted outreach on either side.
           </p>
         </div>
       </section>

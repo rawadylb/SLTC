@@ -30,6 +30,7 @@ export default function SignupForm() {
       return;
     }
 
+    // Account created but not yet verified — don't auto-login, send them to check their inbox.
     router.push('/verify-email');
   }
 
