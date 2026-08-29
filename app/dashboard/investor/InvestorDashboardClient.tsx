@@ -6,7 +6,7 @@ type Idea = {
   id: string;
   title: string;
   category: string;
-  createdAt: string;
+  createdAt: Date;
   interests: unknown[];
 };
 
