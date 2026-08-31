@@ -13,10 +13,6 @@ export default async function MakerDashboard() {
     orderBy: { createdAt: 'desc' },
     include: {
       _count: { select: { views: true } },
-      reveals: {
-        where: { status: 'paid' },
-        include: { investor: { select: { name: true, email: true, phone: true } } },
-      },
     },
   });
 
