@@ -11,8 +11,8 @@ export default function Home() {
           "Live out of your imagination, not your history." — Stephen Covey
         </p>
         <p className="mx-auto mt-4 max-w-xl text-lg text-slate-600">
-          Post your dream, or discover the next one. Real ideas, real investors —
-          contact stays private until you both say yes.
+          Here your dreams comes true, your powerfull project ideas will become real —
+          Send your ideas how much you need and your contact information.
         </p>
         <div className="mt-8 flex justify-center gap-4">
           <Link href="/signup?role=IDEA_MAKER" className="rounded-md bg-brand-600 px-5 py-3 text-white font-medium hover:bg-brand-700">
@@ -28,22 +28,22 @@ export default function Home() {
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           <h3 className="font-semibold text-ink">1. Post or Browse</h3>
           <p className="mt-2 text-sm text-slate-600">
-            Idea makers post ideas for free. Investors browse titles for free too —
-            no names or contact details attached to any listing.
+            Sign up as idea maker to post your ideas here you can start your project with real investor
+            Be diffirent and attract the invostors in your way.
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           <h3 className="font-semibold text-ink">2. Express interest</h3>
           <p className="mt-2 text-sm text-slate-600">
-            When a title catches an investor's eye, they share their contact info and
-            investment range privately with our team — nothing goes to the idea maker yet.
+            Maybe one grat idea will change your life for ever don't give up
+            invest in your ideas, this is you capital.
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           <h3 className="font-semibold text-ink">3. We connect you</h3>
           <p className="mt-2 text-sm text-slate-600">
-            Our team reviews every submission and reaches out to make the introduction —
-            no unwanted outreach on either side.
+            we will let dreamers meets capitals —
+            Set your goals in sltc.me the right place.
           </p>
         </div>
       </section>
