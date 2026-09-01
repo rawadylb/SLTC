@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -17,12 +17,19 @@ export default function LoginPage() {
     setError('');
 
     const res = await signIn('credentials', { email, password, redirect: false });
-    setLoading(false);
 
     if (res?.ok) {
-      router.push('/');
+      const session = await getSession();
+      const role = (session?.user as any)?.role;
+      setLoading(false);
+
+      if (role === 'IDEA_MAKER') router.push('/dashboard/maker');
+      else if (role === 'INVESTOR') router.push('/dashboard/investor');
+      else if (role === 'ADMIN' || role === 'ASSISTANT') router.push('/admin');
+      else router.push('/');
       router.refresh();
     } else {
+      setLoading(false);
       setError('Invalid email/password, or you haven\'t confirmed your email yet — check your inbox for the confirmation link.');
     }
   }

@@ -26,7 +26,7 @@ const emptyForm = { title: '', summary: '', category: '', fundingAsk: '', stage:
 export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
   const router = useRouter();
   const [form, setForm] = useState(emptyForm);
-  const [postFile, setPostFile] = useState<File | null>(null);
+  const [postFiles, setPostFiles] = useState<File[]>([]);
   const [postSuccess, setPostSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,17 +63,27 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
     const newIdea = await res.json();
     let successMsg = 'Idea posted.';
 
-    if (postFile) {
-      const fd = new FormData();
-      fd.append('file', postFile);
-      const uploadRes = await fetch(`/api/ideas/${newIdea.id}/attachments`, { method: 'POST', body: fd });
-      successMsg = uploadRes.ok ? 'Idea posted and file attached.' : 'Idea posted, but the file failed to upload — you can attach it below.';
+    if (postFiles.length > 0) {
+      let succeeded = 0;
+      for (const file of postFiles) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const uploadRes = await fetch(`/api/ideas/${newIdea.id}/attachments`, { method: 'POST', body: fd });
+        if (uploadRes.ok) succeeded++;
+      }
+      if (succeeded === postFiles.length) {
+        successMsg = `Idea posted and ${succeeded} file${succeeded === 1 ? '' : 's'} attached.`;
+      } else if (succeeded > 0) {
+        successMsg = `Idea posted. ${succeeded} of ${postFiles.length} files attached — you can attach the rest below.`;
+      } else {
+        successMsg = 'Idea posted, but the files failed to upload — you can attach them below.';
+      }
     }
 
     setLoading(false);
     setPostSuccess(successMsg);
     setForm(emptyForm);
-    setPostFile(null);
+    setPostFiles([]);
     router.refresh();
   }
 
@@ -131,26 +141,19 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
 
   async function handleFileUpload(ideaId: string, fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
-    const file = fileList[0];
     setUploadingFor(ideaId);
     setUploadError('');
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const res = await fetch(`/api/ideas/${ideaId}/attachments`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    setUploadingFor(null);
-
-    if (!res.ok) {
-      const data = await res.json();
-      setUploadError(data.error || 'Upload failed');
-      return;
+    let failed = 0;
+    for (const file of Array.from(fileList)) {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`/api/ideas/${ideaId}/attachments`, { method: 'POST', body: formData });
+      if (!res.ok) failed++;
     }
 
+    setUploadingFor(null);
+    if (failed > 0) setUploadError(`${failed} file${failed === 1 ? '' : 's'} failed to upload.`);
     router.refresh();
   }
 
@@ -218,11 +221,12 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div>
-            <label className="text-sm text-slate-600">Attach a photo or document (optional, up to 4MB)</label>
+            <label className="text-sm text-slate-600">Attach photos or documents (optional, up to 4MB each)</label>
             <input
               type="file"
+              multiple
               className="mt-1 block w-full text-sm text-slate-600"
-              onChange={(e) => setPostFile(e.target.files?.[0] || null)}
+              onChange={(e) => setPostFiles(Array.from(e.target.files || []))}
             />
           </div>
           {postSuccess && <p className="text-sm font-medium text-green-700">✓ {postSuccess}</p>}
@@ -345,9 +349,10 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
                       </ul>
                     )}
                     <label className="mt-2 inline-block cursor-pointer text-xs font-medium text-brand-600 hover:underline">
-                      {uploadingFor === idea.id ? 'Uploading…' : '+ Attach a file'}
+                      {uploadingFor === idea.id ? 'Uploading…' : '+ Attach files'}
                       <input
                         type="file"
+                        multiple
                         className="hidden"
                         disabled={uploadingFor === idea.id}
                         onChange={(e) => handleFileUpload(idea.id, e.target.files)}
