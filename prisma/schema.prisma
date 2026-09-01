@@ -63,6 +63,7 @@ model Idea {
   views       IdeaView[]
   reveals     Reveal[]
   interests   InterestSubmission[]
+  attachments IdeaAttachment[]
 }
 
 // Anonymized view counter — idea makers see a count only, never who viewed
@@ -92,6 +93,20 @@ model InterestSubmission {
   createdAt  DateTime @default(now())
 
   @@unique([ideaId, investorId])
+}
+
+// A file (photo/doc) the idea maker attached to support their idea.
+// Visible only to the idea maker and admins — never to investors.
+model IdeaAttachment {
+  id           String   @id @default(cuid())
+  idea         Idea     @relation(fields: [ideaId], references: [id])
+  ideaId       String
+  fileName     String
+  fileUrl      String
+  storagePath  String
+  fileType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
 }
 
 // A paid reveal unlocks mutual contact info between the maker and this investor

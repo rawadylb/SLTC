@@ -8,6 +8,7 @@ type Idea = {
   id: string; title: string; category: string; createdAt: Date;
   maker: { name: string; email: string };
   _count: { views: number; interests: number };
+  attachments: { id: string; fileName: string; fileUrl: string }[];
 };
 type Interest = {
   id: string; phone: string; location: string; capital: string; message: string | null; createdAt: Date;
@@ -152,6 +153,7 @@ export default function AdminDashboardClient({
                 <th className="px-4 py-2">Maker</th>
                 <th className="px-4 py-2">Views</th>
                 <th className="px-4 py-2">Interests</th>
+                <th className="px-4 py-2">Files</th>
               </tr>
             </thead>
             <tbody>
@@ -162,6 +164,19 @@ export default function AdminDashboardClient({
                   <td className="px-4 py-2 text-slate-500">{idea.maker.name}</td>
                   <td className="px-4 py-2">{idea._count.views}</td>
                   <td className="px-4 py-2">{idea._count.interests}</td>
+                  <td className="px-4 py-2">
+                    {idea.attachments.length === 0 ? (
+                      <span className="text-slate-400">—</span>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        {idea.attachments.map((a) => (
+                          <a key={a.id} href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline">
+                            {a.fileName}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

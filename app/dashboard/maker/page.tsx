@@ -13,6 +13,7 @@ export default async function MakerDashboard() {
     orderBy: { createdAt: 'desc' },
     include: {
       _count: { select: { views: true } },
+      attachments: { orderBy: { createdAt: 'desc' } },
     },
   });
 

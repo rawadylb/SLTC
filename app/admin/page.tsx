@@ -28,6 +28,7 @@ export default async function AdminDashboard() {
         id: true, title: true, category: true, createdAt: true,
         maker: { select: { name: true, email: true } },
         _count: { select: { views: true, interests: true } },
+        attachments: { select: { id: true, fileName: true, fileUrl: true } },
       },
       take: 100,
     }),

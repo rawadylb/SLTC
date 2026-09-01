@@ -3,6 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+type Attachment = {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  sizeBytes: number;
+};
+
 type Idea = {
   id: string;
   title: string;
@@ -11,6 +18,7 @@ type Idea = {
   fundingAsk: string | null;
   stage: string | null;
   _count: { views: number };
+  attachments: Attachment[];
 };
 
 const emptyForm = { title: '', summary: '', category: '', fundingAsk: '', stage: '' };
@@ -26,6 +34,10 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
   const [editError, setEditError] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState('');
+  const [deletingAttachmentId, setDeletingAttachmentId] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -102,6 +114,52 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
     router.refresh();
   }
 
+  async function handleFileUpload(ideaId: string, fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return;
+    const file = fileList[0];
+    setUploadingFor(ideaId);
+    setUploadError('');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`/api/ideas/${ideaId}/attachments`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    setUploadingFor(null);
+
+    if (!res.ok) {
+      const data = await res.json();
+      setUploadError(data.error || 'Upload failed');
+      return;
+    }
+
+    router.refresh();
+  }
+
+  async function handleDeleteAttachment(attachmentId: string) {
+    if (!confirm('Remove this file?')) return;
+    setDeletingAttachmentId(attachmentId);
+
+    const res = await fetch(`/api/attachments/${attachmentId}`, { method: 'DELETE' });
+
+    setDeletingAttachmentId(null);
+
+    if (!res.ok) {
+      alert('Could not remove this file. Please try again.');
+      return;
+    }
+
+    router.refresh();
+  }
+
+  function formatSize(bytes: number) {
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   return (
     <div className="space-y-10">
       <section>
@@ -151,6 +209,7 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
           >
             {loading ? 'Posting…' : 'Post idea'}
           </button>
+          <p className="text-xs text-slate-400">You can attach supporting photos or documents after posting.</p>
         </form>
       </section>
 
@@ -237,6 +296,41 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
                     >
                       {deletingId === idea.id ? 'Deleting…' : 'Delete'}
                     </button>
+                  </div>
+
+                  <div className="mt-4 border-t border-slate-100 pt-3">
+                    <p className="text-xs font-medium text-slate-500">Supporting files (photos, docs — up to 4MB each)</p>
+                    {idea.attachments.length > 0 && (
+                      <ul className="mt-2 space-y-1">
+                        {idea.attachments.map((a) => (
+                          <li key={a.id} className="flex items-center justify-between text-sm">
+                            <a href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline">
+                              {a.fileName}
+                            </a>
+                            <span className="flex items-center gap-2 text-slate-400">
+                              {formatSize(a.sizeBytes)}
+                              <button
+                                onClick={() => handleDeleteAttachment(a.id)}
+                                disabled={deletingAttachmentId === a.id}
+                                className="text-red-500 hover:underline disabled:opacity-50"
+                              >
+                                {deletingAttachmentId === a.id ? 'Removing…' : 'Remove'}
+                              </button>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <label className="mt-2 inline-block cursor-pointer text-xs font-medium text-brand-600 hover:underline">
+                      {uploadingFor === idea.id ? 'Uploading…' : '+ Attach a file'}
+                      <input
+                        type="file"
+                        className="hidden"
+                        disabled={uploadingFor === idea.id}
+                        onChange={(e) => handleFileUpload(idea.id, e.target.files)}
+                      />
+                    </label>
+                    {uploadError && uploadingFor === null && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
                   </div>
                 </>
               )}
