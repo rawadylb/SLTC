@@ -26,6 +26,8 @@ const emptyForm = { title: '', summary: '', category: '', fundingAsk: '', stage:
 export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
   const router = useRouter();
   const [form, setForm] = useState(emptyForm);
+  const [postFile, setPostFile] = useState<File | null>(null);
+  const [postSuccess, setPostSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -43,6 +45,7 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setPostSuccess('');
 
     const res = await fetch('/api/ideas', {
       method: 'POST',
@@ -50,15 +53,27 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
       body: JSON.stringify(form),
     });
 
-    setLoading(false);
-
     if (!res.ok) {
       const data = await res.json();
       setError(data.error?.formErrors?.[0] || 'Could not post idea');
+      setLoading(false);
       return;
     }
 
+    const newIdea = await res.json();
+    let successMsg = 'Idea posted.';
+
+    if (postFile) {
+      const fd = new FormData();
+      fd.append('file', postFile);
+      const uploadRes = await fetch(`/api/ideas/${newIdea.id}/attachments`, { method: 'POST', body: fd });
+      successMsg = uploadRes.ok ? 'Idea posted and file attached.' : 'Idea posted, but the file failed to upload — you can attach it below.';
+    }
+
+    setLoading(false);
+    setPostSuccess(successMsg);
     setForm(emptyForm);
+    setPostFile(null);
     router.refresh();
   }
 
@@ -202,6 +217,15 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
+          <div>
+            <label className="text-sm text-slate-600">Attach a photo or document (optional, up to 4MB)</label>
+            <input
+              type="file"
+              className="mt-1 block w-full text-sm text-slate-600"
+              onChange={(e) => setPostFile(e.target.files?.[0] || null)}
+            />
+          </div>
+          {postSuccess && <p className="text-sm font-medium text-green-700">✓ {postSuccess}</p>}
           <button
             type="submit"
             disabled={loading}
@@ -209,7 +233,6 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
           >
             {loading ? 'Posting…' : 'Post idea'}
           </button>
-          <p className="text-xs text-slate-400">You can attach supporting photos or documents after posting.</p>
         </form>
       </section>
 
