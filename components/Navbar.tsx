@@ -14,6 +14,8 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4 text-sm">
+          <Link href="/about" className="text-slate-600 hover:text-slate-900">About</Link>
+
           {!session && (
             <>
               <Link href="/login" className="text-slate-600 hover:text-slate-900">Log in</Link>
