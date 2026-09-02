@@ -124,7 +124,7 @@ export default function MakerDashboardClient({ ideas }: { ideas: Idea[] }) {
   }
 
   async function handleDelete(ideaId: string) {
-    if (!confirm('Delete this idea permanently? This cannot be undone.')) return;
+    if (!confirm('Are you sure you want to delete this idea and its attached files? This cannot be undone.')) return;
     setDeletingId(ideaId);
 
     const res = await fetch(`/api/ideas/${ideaId}`, { method: 'DELETE' });

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { containsContactInfo, CONTACT_INFO_ERROR } from '@/lib/contentCheck';
+import { deleteIdeaFile } from '@/lib/supabaseStorage';
 
 const updateSchema = z.object({
   title: z.string().min(3),
@@ -54,7 +55,19 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     return NextResponse.json({ error: 'You can only delete your own ideas' }, { status: 403 });
   }
 
+  // Remove the actual files from storage first (best-effort — don't block
+  // deletion if a file is already gone or storage has a hiccup).
+  const attachments = await db.ideaAttachment.findMany({ where: { ideaId: params.id } });
+  for (const a of attachments) {
+    try {
+      await deleteIdeaFile(a.storagePath);
+    } catch (e) {
+      console.error('Failed to delete storage file during idea delete:', e);
+    }
+  }
+
   await db.$transaction([
+    db.ideaAttachment.deleteMany({ where: { ideaId: params.id } }),
     db.interestSubmission.deleteMany({ where: { ideaId: params.id } }),
     db.ideaView.deleteMany({ where: { ideaId: params.id } }),
     db.reveal.deleteMany({ where: { ideaId: params.id } }),
