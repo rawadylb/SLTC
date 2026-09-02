@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { containsContactInfo, CONTACT_INFO_ERROR } from '@/lib/contentCheck';
 
 const ideaSchema = z.object({
   title: z.string().min(3),
@@ -58,6 +59,10 @@ export async function POST(req: Request) {
   const parsed = ideaSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  if (containsContactInfo(parsed.data.title) || containsContactInfo(parsed.data.summary)) {
+    return NextResponse.json({ error: CONTACT_INFO_ERROR }, { status: 400 });
   }
 
   const idea = await db.idea.create({
