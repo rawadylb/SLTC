@@ -10,7 +10,7 @@ export default function Navbar() {
     <nav className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center gap-2">
-          <svg width="28" height="28" viewBox="0 0 200 200" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 200 200" aria-hidden="true">
             <g transform="translate(40,10) scale(0.6)">
               <g strokeWidth="4" strokeLinecap="round" fill="none">
                 <line x1="100" y1="0" x2="100" y2="18" stroke="#0F172A" />
@@ -29,7 +29,7 @@ export default function Navbar() {
               <line x1="86" y1="146" x2="114" y2="146" stroke="#0F172A" strokeWidth="4" strokeLinecap="round" />
             </g>
           </svg>
-          <span className="text-lg font-bold text-ink">
+          <span className="text-xl font-bold text-ink">
             sltc<span className="text-brand-600">.me</span>
           </span>
         </Link>
