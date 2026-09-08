@@ -52,12 +52,6 @@ export default function Navbar() {
             </>
           )}
 
-          {session && (
-            <span className="text-slate-500">
-              Hi {session.user?.name} · {ROLE_LABELS[role || ''] || role}
-            </span>
-          )}
-
           {role === 'IDEA_MAKER' && (
             <Link href="/dashboard/maker" className="text-slate-600 hover:text-slate-900">My ideas</Link>
           )}
@@ -75,6 +69,11 @@ export default function Navbar() {
               <Link href="/profile" className="text-slate-600 hover:text-slate-900">Profile</Link>
               <button onClick={() => signOut()} className="text-slate-600 hover:text-slate-900">Log out</button>
             </>
+          )}
+          {session && (
+            <span className="text-slate-500">
+              Hi {session.user?.name} · {ROLE_LABELS[role || ''] || role}
+            </span>
           )}
         </div>
       </div>
