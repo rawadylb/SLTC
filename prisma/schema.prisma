@@ -22,6 +22,7 @@ model User {
   email         String   @unique
   passwordHash  String
   role          Role
+  countryCode   String?  // dial code, e.g. "+961" — paired with phone for duplicate checks
   phone         String?  // contact info — never exposed until a reveal is paid for
   bio           String?
   emailVerified DateTime?

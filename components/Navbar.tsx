@@ -3,14 +3,22 @@
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 
+const ROLE_LABELS: Record<string, string> = {
+  IDEA_MAKER: 'Idea Maker',
+  INVESTOR: 'Investor',
+  ADMIN: 'Admin',
+  ASSISTANT: 'Assistant',
+};
+
 export default function Navbar() {
   const { data: session } = useSession();
+  const role = (session?.user as any)?.role as string | undefined;
 
   return (
     <nav className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center gap-2">
-                    <svg width="60" height="60" viewBox="0 0 200 150" aria-hidden="true">
+          <svg width="50" height="50" viewBox="0 0 200 150" aria-hidden="true">
             <g strokeWidth="4" strokeLinecap="round" fill="none">
               <line x1="100" y1="0" x2="100" y2="18" stroke="#0F172A" />
               <line x1="45" y1="18" x2="57" y2="30" stroke="#0F172A" />
@@ -44,15 +52,21 @@ export default function Navbar() {
             </>
           )}
 
-          {session?.user.role === 'IDEA_MAKER' && (
+          {session && (
+            <span className="text-slate-500">
+              Hi {session.user?.name} · {ROLE_LABELS[role || ''] || role}
+            </span>
+          )}
+
+          {role === 'IDEA_MAKER' && (
             <Link href="/dashboard/maker" className="text-slate-600 hover:text-slate-900">My ideas</Link>
           )}
 
-          {session?.user.role === 'INVESTOR' && (
+          {role === 'INVESTOR' && (
             <Link href="/dashboard/investor" className="text-slate-600 hover:text-slate-900">Browse ideas</Link>
           )}
 
-          {(session?.user.role === 'ADMIN' || session?.user.role === 'ASSISTANT') && (
+          {(role === 'ADMIN' || role === 'ASSISTANT') && (
             <Link href="/admin" className="text-slate-600 hover:text-slate-900">Admin</Link>
           )}
 

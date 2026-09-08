@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { COUNTRY_CODES } from '@/lib/countryCodes';
 
 export default function SignupForm() {
   const params = useSearchParams();
   const router = useRouter();
   const [role, setRole] = useState(params.get('role') === 'INVESTOR' ? 'INVESTOR' : 'IDEA_MAKER');
-  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', countryCode: '+961', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +31,6 @@ export default function SignupForm() {
       return;
     }
 
-    // Account created but not yet verified — don't auto-login, send them to check their inbox.
     router.push('/verify-email');
   }
 
@@ -71,12 +71,27 @@ export default function SignupForm() {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
-        <input
-          placeholder="Phone (kept private until a reveal)"
-          className="w-full rounded-md border border-slate-300 px-3 py-2"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
+
+        <div className="flex gap-2">
+          <select
+            className="rounded-md border border-slate-300 px-2 py-2 text-sm"
+            value={form.countryCode}
+            onChange={(e) => setForm({ ...form, countryCode: e.target.value })}
+          >
+            {COUNTRY_CODES.map((c) => (
+              <option key={c.code} value={c.code}>{c.code} {c.name}</option>
+            ))}
+          </select>
+          <input
+            placeholder="Phone number"
+            required
+            className="flex-1 rounded-md border border-slate-300 px-3 py-2"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, '') })}
+          />
+        </div>
+        <p className="-mt-2 text-xs text-slate-400">Kept private until we connect you with someone.</p>
+
         <input
           type="password"
           placeholder="Password (min 8 characters)"
