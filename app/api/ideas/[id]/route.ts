@@ -14,16 +14,20 @@ const updateSchema = z.object({
   stage: z.string().optional(),
 });
 
-// PATCH /api/ideas/[id] — idea maker edits their own idea
+function canManage(idea: { makerId: string }, userId: string, role: string) {
+  return idea.makerId === userId || role === 'ADMIN';
+}
+
+// PATCH /api/ideas/[id] — the idea's own maker, or an admin, can edit it
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'IDEA_MAKER') {
-    return NextResponse.json({ error: 'Only idea makers can edit ideas' }, { status: 403 });
+  if (!session || (session.user.role !== 'IDEA_MAKER' && session.user.role !== 'ADMIN')) {
+    return NextResponse.json({ error: 'Not authorized to edit ideas' }, { status: 403 });
   }
 
   const idea = await db.idea.findUnique({ where: { id: params.id } });
   if (!idea) return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
-  if (idea.makerId !== session.user.id) {
+  if (!canManage(idea, session.user.id, session.user.role)) {
     return NextResponse.json({ error: 'You can only edit your own ideas' }, { status: 403 });
   }
 
@@ -41,22 +45,20 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   return NextResponse.json(updated);
 }
 
-// DELETE /api/ideas/[id] — idea maker deletes their own idea, and any
-// dependent view/interest records that reference it.
+// DELETE /api/ideas/[id] — the idea's own maker, or an admin, can delete it,
+// along with any dependent view/interest/attachment records.
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'IDEA_MAKER') {
-    return NextResponse.json({ error: 'Only idea makers can delete ideas' }, { status: 403 });
+  if (!session || (session.user.role !== 'IDEA_MAKER' && session.user.role !== 'ADMIN')) {
+    return NextResponse.json({ error: 'Not authorized to delete ideas' }, { status: 403 });
   }
 
   const idea = await db.idea.findUnique({ where: { id: params.id } });
   if (!idea) return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
-  if (idea.makerId !== session.user.id) {
+  if (!canManage(idea, session.user.id, session.user.role)) {
     return NextResponse.json({ error: 'You can only delete your own ideas' }, { status: 403 });
   }
 
-  // Remove the actual files from storage first (best-effort — don't block
-  // deletion if a file is already gone or storage has a hiccup).
   const attachments = await db.ideaAttachment.findMany({ where: { ideaId: params.id } });
   for (const a of attachments) {
     try {

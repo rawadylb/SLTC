@@ -25,7 +25,7 @@ export default async function AdminDashboard() {
     db.idea.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
-        id: true, title: true, category: true, createdAt: true,
+        id: true, title: true, summary: true, category: true, fundingAsk: true, stage: true, createdAt: true,
         maker: { select: { name: true, email: true } },
         _count: { select: { views: true, interests: true } },
         attachments: { select: { id: true, fileName: true, fileUrl: true } },
