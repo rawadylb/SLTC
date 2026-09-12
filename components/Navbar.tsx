@@ -52,7 +52,7 @@ export default function Navbar() {
             </>
           )}
 
-          {role === 'IDEA_MAKER' && (
+          {(role === 'IDEA_MAKER' || role === 'ADMIN') && (
             <Link href="/dashboard/maker" className="text-slate-600 hover:text-slate-900">My ideas</Link>
           )}
 

@@ -6,7 +6,7 @@ import MakerDashboardClient from './MakerDashboardClient';
 
 export default async function MakerDashboard() {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'IDEA_MAKER') redirect('/login');
+  if (!session || (session.user.role !== 'IDEA_MAKER' && session.user.role !== 'ADMIN')) redirect('/login');
 
   const ideas = await db.idea.findMany({
     where: { makerId: session.user.id },

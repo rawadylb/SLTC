@@ -48,10 +48,10 @@ export async function GET() {
   return NextResponse.json(ideas);
 }
 
-// POST /api/ideas — idea makers post a new idea
+// POST /api/ideas — idea makers (or admins) post a new idea
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'IDEA_MAKER') {
+  if (!session || (session.user.role !== 'IDEA_MAKER' && session.user.role !== 'ADMIN')) {
     return NextResponse.json({ error: 'Only idea makers can post ideas' }, { status: 403 });
   }
 

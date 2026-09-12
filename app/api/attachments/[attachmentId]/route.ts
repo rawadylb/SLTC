@@ -6,7 +6,7 @@ import { deleteIdeaFile } from '@/lib/supabaseStorage';
 
 export async function DELETE(_req: Request, { params }: { params: { attachmentId: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'IDEA_MAKER') {
+  if (!session || (session.user.role !== 'IDEA_MAKER' && session.user.role !== 'ADMIN')) {
     return NextResponse.json({ error: 'Only idea makers can delete attachments' }, { status: 403 });
   }
 
@@ -15,7 +15,7 @@ export async function DELETE(_req: Request, { params }: { params: { attachmentId
     include: { idea: true },
   });
   if (!attachment) return NextResponse.json({ error: 'Attachment not found' }, { status: 404 });
-  if (attachment.idea.makerId !== session.user.id) {
+  if (attachment.idea.makerId !== session.user.id && session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'You can only delete your own attachments' }, { status: 403 });
   }
 

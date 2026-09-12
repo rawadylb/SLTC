@@ -8,13 +8,13 @@ const MAX_SIZE = 4 * 1024 * 1024; // 4MB, safely under Vercel's request body lim
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'IDEA_MAKER') {
+  if (!session || (session.user.role !== 'IDEA_MAKER' && session.user.role !== 'ADMIN')) {
     return NextResponse.json({ error: 'Only idea makers can attach files' }, { status: 403 });
   }
 
   const idea = await db.idea.findUnique({ where: { id: params.id } });
   if (!idea) return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
-  if (idea.makerId !== session.user.id) {
+  if (idea.makerId !== session.user.id && session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'You can only attach files to your own ideas' }, { status: 403 });
   }
 
